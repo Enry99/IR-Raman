@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 #############################################
@@ -16,36 +16,49 @@ import os
 import numpy as np
 import re
 
+INCAR_TAGS = """
+ LEPSILON=.TRUE.
+"""
+
 # defining constants for the lorentzian smearing
 epsilon = 1e-8
 fwhm=15.0
 
 class Lorentz(object): # inspired from Balint Aradi smearing procedure for DOS analysis in DFTB
+  #TODO: use the one from raman. That is normalized, this is not.
   """Lorentzian smearing"""
   def __init__(self, gamma, center, coef):
     self._gamma = gamma
     self._center = center
-    self._coef = coef    
+    self._coef = coef
   def __call__(self, xx):
-    dx = xx - self._center
-    return self._coef/(1+4*(dx**2)/((2*self._gamma)**2))
+    return self._coef/(1+((xx - self._center)**2)/((self._gamma)**2))
+
 
 class Mode():
+    #TODO: in the future, standardize this between raman.py and ir.py, to
+    # avoid code duplication
     """
-    Structure for storing frequency (self.freq) and eigenvalues (self.values) of each mode. If the frequency is imaginary, it is set to be negative.
+    Class for storing frequency (self.freq) and eigenvectors (self.values) of each mode.
+    If the frequency is imaginary, it is set to be negative.
+
+    Parameters:
+        text (str): text for the mode
     """
-    def __init__(self,text):
-        tline = text.split('\n')
-        if 'f/i' in tline[0]:
-            fi_factor = -1.0
-        else:
-            fi_factor = 1.0
-        self.freq=float(re.findall(r'Hz\s+(\d+\.\d+)\s+cm-1',tline[0])[0])*fi_factor
+    def __init__(self, text : str):
+        lines = text.split('\n')
+
+        fi_factor = -1 if 'f/i' in lines[0] else 1
+        # 60 f  =    5.519867 THz    34.682350 2PiTHz  184.122959 cm-1    22.828327 meV
+        self.freq = fi_factor * float(re.findall(r'Hz\s+(\d+\.\d+)\s+cm-1',lines[0])[0])
+
         tmplist = []
-        for i in tline[2:]:
-            if i.strip():
+        for i in lines[2:]:
+            if i.strip(): #non empty line
+                #X         Y         Z           dx          dy          dz
                 tmplist.append([float(x.strip()) for x in i.split()])
         self.values = np.array(tmplist)
+
 
 def readfile(file):
     """
@@ -224,15 +237,4 @@ if __name__ == "__main__":
     normalize()
     print '\tresults.txt written\n'
     plotIR()
-    print '\nGenerating gnuplot script'
-    print "="*len('Generating gnuplot script')
-    with open('spectrum.gnu','w') as gnu:
-        gnu.write("set term aqua enhanced font 'Helvetica,20' # comment for pdf output\n")
-        gnu.write("#set term pdf color enhanced font 'Helvetica,20' size 16cm,12cm # uncom")
-        gnu.write("ment for pdf output\n#set output 'spectrum.pdf' #uncomment for pdf output\n\n")
-        gnu.write("\n#scales\n#set xrange[100:1000]\n#set yrange[0:1]\n\n")
-        gnu.write("set xlabel 'Frequency (cm^{-1})'\n")
-        gnu.write("set ylabel 'Normalized intensity'\n")
-        gnu.write("p 'results.txt' u 2:3 w i t'Normalized IR spectrum','spectrum.txt' w l t'Lorentzian smearing'\n")
-    print '\tspectrum.gnu written\n\nSuccessfull termination !'
-    
+
