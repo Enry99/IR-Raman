@@ -16,6 +16,9 @@ import os
 import numpy as np
 import re
 
+from xphon.calculations.utils import get_modes_from_OUTCAR, read_input_parameters
+from xphon import PHONONS_DIR
+
 INCAR_TAGS = """
  LEPSILON=.TRUE.
 """
@@ -34,30 +37,6 @@ class Lorentz(object): # inspired from Balint Aradi smearing procedure for DOS a
   def __call__(self, xx):
     return self._coef/(1+((xx - self._center)**2)/((self._gamma)**2))
 
-
-class Mode():
-    #TODO: in the future, standardize this between raman.py and ir.py, to
-    # avoid code duplication
-    """
-    Class for storing frequency (self.freq) and eigenvectors (self.values) of each mode.
-    If the frequency is imaginary, it is set to be negative.
-
-    Parameters:
-        text (str): text for the mode
-    """
-    def __init__(self, text : str):
-        lines = text.split('\n')
-
-        fi_factor = -1 if 'f/i' in lines[0] else 1
-        # 60 f  =    5.519867 THz    34.682350 2PiTHz  184.122959 cm-1    22.828327 meV
-        self.freq = fi_factor * float(re.findall(r'Hz\s+(\d+\.\d+)\s+cm-1',lines[0])[0])
-
-        tmplist = []
-        for i in lines[2:]:
-            if i.strip(): #non empty line
-                #X         Y         Z           dx          dy          dz
-                tmplist.append([float(x.strip()) for x in i.split()])
-        self.values = np.array(tmplist)
 
 
 def readfile(file):
@@ -123,28 +102,6 @@ def plotIR():
                 spec.write("{0:.10f}  {1:.10f}\n".format(i[0],i[1]))
     print '\n\tspectrum.txt written'
 
-def parseEigenvectors(nIons,outcar):
-    """
-    Generates a list of modes (frequency, eigenvector) from eigenvectors.txt file
-    """
-    outcar_sp=outcar.split('SQRT(mass)')[1]
-    EIG_NVIBS = len(re.findall('cm-1',outcar_sp))
-    EIG_NROWS = (nIons+3)*EIG_NVIBS+3
-    content = []
-    for i in outcar_sp.split('\n'):
-        if '-----------------------------------------------------------------------------------------' in i: break
-        content.append(i)
-    eigV = []
-    buffer = ""
-    for line in content[4:]:
-        lst = line.strip()
-        if not lst:
-            if buffer != "":
-                eigV.append(Mode(buffer))
-                buffer = ""
-        else:
-            buffer += '{0}\n'.format(line)
-    return eigV
 
 def parsePolar(nIons,outcar):
     """
@@ -181,10 +138,13 @@ def parsePolar(nIons,outcar):
     Polar.append(np.array(pol))
     return Polar
 
-def calcIntensities(nIons,eigV,polar):
+
+def get_ir_intensities(nIons,eigV,polar):
     """
     Computes the IR intensities
     """
+
+    #Formula: https://utheses.univie.ac.at/detail/9139#, (Eq. 2.51)
     with open('exact.res.txt','w') as outfile:
         for mm in range(len(eigV)):
             int = 0.0
@@ -200,19 +160,16 @@ def calcIntensities(nIons,eigV,polar):
                 int += sumpol**2
             outfile.write('{0:03d} {1:.5f} {2:.5f}\n'.format(mm+1,freq,int))
 
-def normalize():
-    """
-    Normalizes the IR intensities
-    """
-    with open('exact.res.txt','r') as infile:
-        values = np.array([y.strip().split() for y in infile.readlines() if y],dtype=float)
-    maxval = max(values[:,2])
-    values[:,2] /= maxval
-    with open('results.txt','w') as outfile:
-        for val in values:
-            outfile.write('{0:>5d} {1:>10.5f} {2:10.5f}\n'.format(int(val[0]),val[1],val[2]))
 
-if __name__ == "__main__":
+def write_ir_spectrum():
+
+    atoms, _, _, _ = read_input_parameters()
+    natoms = len(atoms)
+
+    if not os.path.isfile(f'{PHONONS_DIR}/OUTCAR'):
+        sys.exit(f"OUTCAR file not found in {PHONONS_DIR}")
+
+
     print 'Opening OUTCAR file'
     print "="*len('Opening OUTCAR file')
     nionsR = re.compile(r'NIONS\s+=\s+(\d+)')
@@ -224,17 +181,19 @@ if __name__ == "__main__":
     # test born charges
     if not re.search('BORN',outcar):
         sys.exit('Born charges are not present in OUTCAR')
-    nIons = int(re.findall(nionsR,outcar)[0])
-    print '\tParsing eigenvectors'
-    eigV = parseEigenvectors(nIons,outcar)
+    natoms = int(re.findall(nionsR,outcar)[0])
+
+
+    print(f"Reading eigenvectors from {PHONONS_DIR}/OUTCAR")
+    modes_list = get_modes_from_OUTCAR(f'{PHONONS_DIR}/OUTCAR', natoms)
+
     print '\n\n\tParsing Born charges'
     polar = parsePolar(nIons,outcar)
     print '\n\nCalculating intensities'
     print "="*len('Calculating intensities')
     calcIntensities(nIons,eigV,polar)
     print '\texact.res.txt written\n\nNormalizing'
-    print "="*len('Normalizing')
-    normalize()
+
     print '\tresults.txt written\n'
     plotIR()
 
