@@ -19,6 +19,8 @@ in the working directory.
 The INCAR file should contain the following tags:
     EDIFF = 1E-10    !or anyway a very low value
     NELMIN = 10      !(or higher)
+    ISYM = 0
+    PREC = Accurate
     LCHARG = .FALSE. !(to avoid producing hundreds CHGCAR files in Raman calculations)
     LWAVE = .FALSE.  !(to avoid producing hundreds of heavy WAVECAR files in Raman calculations)
 
@@ -26,7 +28,7 @@ The settings.json file should contain these keys:
 {
     "step_size": 0.01,  # displacement step size in Angstrom
     "jobscript_path": "path/to/your/jobscript.sh",
-    "submit_command": "sbatch" (optional, default is "sbatch")
+    "submit_command": "sbatch"  #(optional, default is "sbatch")
 }
 
 Workflow:

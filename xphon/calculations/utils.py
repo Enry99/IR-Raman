@@ -43,23 +43,23 @@ def get_modes_from_OUTCAR(outcar_filename, natoms):
 
     modes_list : list[Mode] = []
 
-    with open(outcar_filename, 'r') as outcar_fh:
+    with open(outcar_filename, 'r') as f:
 
         while True:
-            line = outcar_fh.readline()
+            line = f.readline()
             if not line:
                 break
 
             if "Eigenvectors after division by SQRT(mass)" in line:
-                outcar_fh.readline() # empty line
-                outcar_fh.readline() # Eigenvectors and eigenvalues of the dynamical matrix
-                outcar_fh.readline() # ----------------------------------------------------
-                outcar_fh.readline() # empty line
+                f.readline() # empty line
+                f.readline() # Eigenvectors and eigenvalues of the dynamical matrix
+                f.readline() # ----------------------------------------------------
+                f.readline() # empty line
 
                 for i in range(natoms*3):
-                    outcar_fh.readline() # empty line
+                    f.readline() # empty line
 
-                    mode_header_line = outcar_fh.readline()
+                    mode_header_line = f.readline()
                     # 60 f  =    5.519867 THz    34.682350 2PiTHz  184.122959 cm-1    22.828327 meV
                     match_regex = re.search(r'^\s*(\d+).+?([\.\d]+) cm-1', mode_header_line)
                     if 'f/i' in mode_header_line:
@@ -68,10 +68,10 @@ def get_modes_from_OUTCAR(outcar_filename, natoms):
                         imaginary = False
 
 
-                    outcar_fh.readline()# X         Y         Z           dx          dy          dz
+                    f.readline()# X         Y         Z           dx          dy          dz
                     eigvec = []
                     for _ in range(natoms):
-                        tmp = outcar_fh.readline().split()
+                        tmp = f.readline().split()
                         eigvec.append([ float(tmp[x]) for x in range(3,6) ]) #range(3,6) -> dx dy dz
 
 
@@ -106,21 +106,56 @@ def get_epsilon_from_OUTCAR(outcar_filename):
     '''
     epsilon = []
 
-    with open(outcar_filename, 'r') as outcar_fh:
-        outcar_fh.seek(0) # just in case
+    with open(outcar_filename, 'r') as f:
+        f.seek(0) # just in case
         while True:
-            line = outcar_fh.readline()
+            line = f.readline()
             if not line:
                 break
 
             if "MACROSCOPIC STATIC DIELECTRIC TENSOR" in line:
-                outcar_fh.readline()
-                epsilon.append([float(x) for x in outcar_fh.readline().split()])
-                epsilon.append([float(x) for x in outcar_fh.readline().split()])
-                epsilon.append([float(x) for x in outcar_fh.readline().split()])
+                f.readline()
+                epsilon.append([float(x) for x in f.readline().split()])
+                epsilon.append([float(x) for x in f.readline().split()])
+                epsilon.append([float(x) for x in f.readline().split()])
                 return epsilon
 
         raise RuntimeError("Couldn't find dielectric tensor in OUTCAR")
+
+
+def get_Born_charges_from_OUTCAR(outcar_filename, natoms):
+    """
+    Generates a list of arrays containing Born Charges from OUTCAR
+    """
+
+    born_charges = []  #size: natoms x 3(alpha) x 3(beta)
+
+    with open(outcar_filename, 'r') as f:
+
+        while True:
+            line = f.readline()
+            if not line:
+                break
+
+            if "BORN EFFECTIVE CHARGES (including local field effects)" in line:
+                f.readline() #-----------------------------------------
+
+                for i in range(natoms):
+
+                    line = f.readline() #read ion line, e.g. "ion  1"
+                    if 'ion' not in line or int(line.split()[1]) != i+1:
+                        raise RuntimeError("Error reading Born effective charges in OUTCAR")
+
+                    ion_charges = []
+                    for _ in range(3):
+                        line = f.readline() #  1     1.90698    -0.02671     0.02386
+                        ion_charges.append([float(x.strip()) for x in line.split()[1:]])
+
+                    born_charges.append(ion_charges)
+
+                return born_charges
+
+        raise RuntimeError("Couldn't find Born effective charges in OUTCAR")
 
 
 def read_input_parameters():

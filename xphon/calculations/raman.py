@@ -184,10 +184,10 @@ def write_raman_spectrum():
     modes_list = get_modes_from_OUTCAR(f'{PHONONS_DIR}/OUTCAR', len(atoms))
 
 
-    with open('vasp_raman.dat', 'w') as f:
+    with open('raman_spectrum.dat', 'w') as f:
         f.write("mode    mode_vasp    freq(cm-1)    a    gamma2    delta2    activity\n")
 
-        #loop over phonon modes, excluding the first three (translationsy, imaginary)
+        #loop over phonon modes
         for mode in modes_list:
 
             ra = get_raman_tensor_for_mode(mode, step_size, atoms.get_volume())

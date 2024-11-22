@@ -28,19 +28,11 @@ def build_xphon_parser():
     subparsers = parser.add_subparsers(title='commands',dest='command')
 
     commands = [
-        ('gen', 'xphon.cli.gen'),
-        ('screen', 'xphon.cli.screen'),
-        ('relax', 'xphon.cli.relax'),
-        ('mlopt', 'xphon.cli.mlopt'),
-        ('isolated', 'xphon.cli.isolated'),
-        ('restart', 'xphon.cli.restart'),
-        ('scancel', 'xphon.cli.scancel'),
-        ('sites', 'xphon.cli.sites'),
-        ('render', 'xphon.cli.render'),
-        ('view', 'xphon.cli.view'),
-        ('savefiles', 'xphon.cli.savefiles'),
-        ('update', 'xphon.cli.update'),
-        ('energyplot', 'xphon.cli.energyplot')
+        ('ir', 'xphon.cli.ir'),
+        ('raman', 'xphon.cli.raman'),
+        ('write', 'xphon.cli.write'),
+        ('plot', 'xphon.cli.plot'),
+        ('scancel', 'xphon.cli.scancel')
     ]
 
     for command, module_name in commands:

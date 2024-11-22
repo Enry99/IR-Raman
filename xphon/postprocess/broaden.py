@@ -22,8 +22,11 @@ def get_broadened_spectrum(frequencies : np.ndarray,
         Type of broadening function ('Gaussian' or 'Lorentzian').
     """
 
+    if fwhm < 1e-8:
+        raise ValueError("FWHM must be greater than 0.")
+
     # Normalize intensities
-    intensities /= np.max(np.abs(intensities))
+    #intensities /= np.max(np.abs(intensities))
 
     # Make space for broadened spectrum at boundaries
     fmin = min(frequencies)

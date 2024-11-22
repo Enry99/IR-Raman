@@ -12,7 +12,7 @@ COLORS = {
 }
 
 COLUMNS = {
-    'ir': (1, 2),
+    'ir': (2, 3),
     'raman': (2, 6)
 }
 
@@ -43,7 +43,7 @@ def plot_spectrum(spectrum : str,
 
     else:
         from xphon.postprocess.broaden import get_broadened_spectrum
-        x, y = get_broadened_spectrum(x, y, gam=fwhm/2, function=broaden_type)
+        x, y = get_broadened_spectrum(x, y, fwhm, function=broaden_type)
 
         plt.plot(x, y, color=COLORS[spectrum])
 
@@ -51,6 +51,6 @@ def plot_spectrum(spectrum : str,
         plt.xlim(freq_range)
 
     plt.xlabel('Frequency (cm-1)')
-    plt.ylabel('Intensity')
+    plt.ylabel('Intensity (a.u.)')
     plt.title(f'{spectrum.capitalize()} spectrum')
     plt.savefig(f'{spectrum}_spectrum.png', dpi=300, bbox_inches='tight')

@@ -17,13 +17,12 @@ class CLICommand(CLICommandBase):
 
     @staticmethod
     def add_arguments(parser : argparse.ArgumentParser):
-        parser.add_argument('-write-only', action='store_true',
-                            help='Write input files only, do not launch the calculation')
+        return
 
     @staticmethod
     def run(args : argparse.Namespace):
         from xphon.calculations.ir import launch_ir_calculation
-        launch_ir_calculation(args.write_only)
+        launch_ir_calculation()
 
 
     @staticmethod
