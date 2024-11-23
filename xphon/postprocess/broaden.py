@@ -30,7 +30,7 @@ def get_broadened_spectrum(frequencies : np.ndarray,
 
     # Make space for broadened spectrum at boundaries
     fmin = max(min(frequencies) - 5*fwhm, 0)
-    fmax = max(frequencies) - 5*fwhm
+    fmax = max(frequencies) + 5*fwhm
     erange = np.arange(fmin, fmax, fwhm/10)
 
     spectrum = 0.0*erange
