@@ -70,7 +70,7 @@ def write_displaced_POSCARS(atoms : Atoms, step_size: int):
                 except RuntimeError as e:
                     print(f"{outcar_path}: {e}, re-running.")
 
-            print("Writing files for mode "+str(mode.id)+". displacement "+str(displacement))
+            print(f"Writing files for mode {mode.id}, displacement {displacement:+d}")
 
             # write displaced POSCAR
             atoms_displaced = atoms.copy()

@@ -24,7 +24,7 @@ def plot_spectrum(spectrum : str,
 
     Args:
         - spectrum (str): Which spectrum to plot.
-        - broaden_type (str): Type of broadening to apply to the spectrum.
+        - broaden_type (str): Type of broadening to apply to the spectrum. ('gauss' or 'lorentz')
         - fwhm (float): Broadening FWHM for the spectrum.
         - freq_range (tuple): Frequency range (cm-1) of the spectrum to plot.
     """

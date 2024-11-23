@@ -29,7 +29,7 @@ class Mode:
     norm: float
 
 
-def get_modes_from_OUTCAR(outcar_filename, natoms):
+def get_modes_from_OUTCAR(outcar_filename : str, natoms : int):
     '''
     Read phonon modes from OUTCAR file, excluding imaginary modes.
 
