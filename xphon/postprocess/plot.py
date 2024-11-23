@@ -39,7 +39,9 @@ def plot_spectrum(spectrum : str,
 
     # Plot the data
     if broaden_type is None:
-        plt.stem(x, y, linefmt=f'{COLORS[spectrum]}-', markerfmt=' ')
+        _, stemlines, baseline = plt.stem(x, y, markerfmt=' ')
+        plt.setp(stemlines, 'color', COLORS[spectrum])
+        plt.setp(baseline, 'color', COLORS[spectrum])
 
     else:
         from xphon.postprocess.broaden import get_broadened_spectrum
