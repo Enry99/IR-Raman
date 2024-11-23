@@ -8,6 +8,7 @@
 
 import sys
 import os
+import shutil
 
 from xphon.calculations.utils import Mode, read_input_parameters, \
     get_modes_from_OUTCAR, get_Born_charges_from_OUTCAR
@@ -25,6 +26,10 @@ def launch_ir_calculation():
     '''
 
     _, _, jobscript_path, submit_command = read_input_parameters()
+
+
+    os.makedirs(PHONONS_DIR, exist_ok=True)
+    shutil.copyfile('INCAR', PHONONS_DIR)
 
     launch_jobs(subdir_paths=[PHONONS_DIR],
                 jobscript_path=jobscript_path,
