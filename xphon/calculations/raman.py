@@ -32,13 +32,10 @@ from xphon import RAMAN_DIR, PHONONS_DIR
 DISPS = (-1, 1)      # hardcoded for
 COEFFS = (-0.5, 0.5) # three point stencil (nderiv=2)
 
+
 INCAR_TAGS = """
- IBRION = 7
- NSW = 1
- NWRITE = 3
  LEPSILON=.TRUE.
 """
-
 
 def write_displaced_POSCARS(atoms : Atoms, step_size: int):
     '''

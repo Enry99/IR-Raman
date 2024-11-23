@@ -17,6 +17,9 @@ from xphon import PHONONS_DIR
 
 
 INCAR_TAGS = """
+ IBRION = 7
+ NSW = 1
+ NWRITE = 3
  LEPSILON=.TRUE.
 """
 
