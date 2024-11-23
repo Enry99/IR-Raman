@@ -43,6 +43,7 @@ def plot_spectrum(spectrum : str,
     if broaden_type is None:
         _, stemlines, baseline = plt.stem(x, y, markerfmt=' ')
         plt.setp(stemlines, 'color', COLORS[spectrum])
+        plt.setp(stemlines, 'linewidth', 0.5)
         plt.setp(baseline, 'color', COLORS[spectrum])
 
     else:
@@ -57,7 +58,7 @@ def plot_spectrum(spectrum : str,
     plt.xlabel('Frequency (cm-1)')
     plt.ylabel('Intensity (a.u.)')
     plt.title(f'{spectrum.capitalize()} spectrum')
-    figname = f'{spectrum}_spectrum_{"broaden" if broaden_type else ""}.png'
+    figname = f'{spectrum}_spectrum{"_broaden" if broaden_type else ""}.png'
     plt.savefig(figname, dpi=300, bbox_inches='tight')
 
     print(f'Plot saved in {figname}.')
