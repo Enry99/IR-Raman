@@ -78,7 +78,7 @@ def get_modes_from_OUTCAR(outcar_filename, natoms):
 
                     if not imaginary:
                         modes_list.append(
-                            Mode(id=i+1,
+                            Mode(id=natoms*3-i, #reverse vasp order, starting from 1
                                  id_vasp=int(match_regex.group(1)),
                                  frequency=float(match_regex.group(2)),
                                  eigvec=eigvec,
@@ -87,11 +87,7 @@ def get_modes_from_OUTCAR(outcar_filename, natoms):
 
 
                 #reverse order of modes, since vasp writes them in reverse order (higer freqs first)
-                mode_ids = list(reversed(mode_ids))
-                mode_ids_vasp = list(reversed(mode_ids_vasp))
-                frequencies = list(reversed(frequencies))
-                eigvecs = list(reversed(eigvecs))
-                norms   = list(reversed(norms))
+                modes_list.reverse()
 
                 return modes_list
 
