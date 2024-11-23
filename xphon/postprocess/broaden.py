@@ -6,7 +6,7 @@ import numpy as np
 
 def get_broadened_spectrum(frequencies : np.ndarray,
                            intensities : np.ndarray,
-                           fwhm : float = 15.0,
+                           fwhm : float = 10.0,
                            function : str ='lorentz'):
     """
     Broaden the spectrum using a Gaussian or Lorentzian function.
@@ -29,9 +29,9 @@ def get_broadened_spectrum(frequencies : np.ndarray,
     #intensities /= np.max(np.abs(intensities))
 
     # Make space for broadened spectrum at boundaries
-    fmin = min(frequencies)
-    fmax = max(frequencies)
-    erange = np.arange(fmin-40*fwhm,fmax+40*fwhm,fwhm/10)
+    fmin = max(min(frequencies) - 5*fwhm, 0)
+    fmax = max(frequencies) - 5*fwhm
+    erange = np.arange(fmin, fmax, fwhm/10)
 
     spectrum = 0.0*erange
     for freq, intensity in zip(frequencies, intensities):

@@ -22,7 +22,7 @@ class CLICommand(CLICommandBase):
                             help='Which spectrum to plot.')
         parser.add_argument('-broaden', choices=['gauss', 'lorentz'],
                             help='Type of broadening to apply to the spectrum.')
-        parser.add_argument('-fwhm', type=float, default=15.0,
+        parser.add_argument('-fwhm', type=float, default=10.0,
                             help='Broadening FWHM for the spectrum.')
         parser.add_argument('-range', type=float, nargs=2,
                             help='Frequency range (cm-1) of the spectrum to plot.')

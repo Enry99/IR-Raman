@@ -87,6 +87,7 @@ def write_ir_spectrum():
     born_charges = get_Born_charges_from_OUTCAR(f'{PHONONS_DIR}/OUTCAR', natoms)
 
 
+    print("Computing IR intensities...")
     with open('ir_spectrum.dat', 'w') as f:
         f.write("mode    mode_vasp    freq(cm-1)    intensity\n")
 
@@ -97,3 +98,5 @@ def write_ir_spectrum():
 
             #write to output file
             f.write(f"{mode.id:03d}  {mode.id_vasp:03d}   {mode.frequency:10.5f}  {intensity:10.7f}\n")
+
+    print("IR spectrum written to ir_spectrum.dat")

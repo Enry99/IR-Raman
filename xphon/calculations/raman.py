@@ -177,10 +177,11 @@ def write_raman_spectrum():
     Write the Raman activity, reading the displaced OUTCAR files
     '''
 
+    print("Reading Raman data from OUTCAR files...")
     atoms, step_size, _, _ = read_input_parameters()
     modes_list = get_modes_from_OUTCAR(f'{PHONONS_DIR}/OUTCAR', len(atoms))
 
-
+    print('Calculating Raman activity...')
     with open('raman_spectrum.dat', 'w') as f:
         f.write("mode    mode_vasp    freq(cm-1)    a    gamma2    delta2    activity\n")
 
@@ -195,3 +196,5 @@ def write_raman_spectrum():
             #write to output file
             f.write(f"{mode.id:03d}  {mode.id_vasp:03d}   {mode.frequency:10.5f}  {a:10.7f}\
                                 {gamma2:10.7f}  {delta2:10.7f} {activity:10.7f}\n")
+
+    print("Raman spectrum written to raman_spectrum.dat")

@@ -30,6 +30,7 @@ def plot_spectrum(spectrum : str,
     """
 
     # Read the data
+    print(f'Reading {spectrum}_spectrum.dat...')
     data = np.loadtxt(fname=f'{spectrum}_spectrum.dat',
                       dtype=float,
                       skiprows=1,
@@ -38,6 +39,7 @@ def plot_spectrum(spectrum : str,
     y = data[:, 1]
 
     # Plot the data
+    print(f'Plotting {spectrum}...')
     if broaden_type is None:
         _, stemlines, baseline = plt.stem(x, y, markerfmt=' ')
         plt.setp(stemlines, 'color', COLORS[spectrum])
@@ -55,4 +57,7 @@ def plot_spectrum(spectrum : str,
     plt.xlabel('Frequency (cm-1)')
     plt.ylabel('Intensity (a.u.)')
     plt.title(f'{spectrum.capitalize()} spectrum')
-    plt.savefig(f'{spectrum}_spectrum.png', dpi=300, bbox_inches='tight')
+    figname = f'{spectrum}_spectrum_{"broaden" if broaden_type else ""}.png'
+    plt.savefig(figname, dpi=300, bbox_inches='tight')
+
+    print(f'Plot saved in {figname}.')
