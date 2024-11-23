@@ -96,4 +96,4 @@ def write_ir_spectrum():
             intensity = get_ir_intensity_for_mode(mode, born_charges)
 
             #write to output file
-            f.write(f"{mode.id:03d}  {mode.id_vasp:03d}   {intensity:10.7f}\n")
+            f.write(f"{mode.id:03d}  {mode.id_vasp:03d}   {mode.frequency:10.5f}  {intensity:10.7f}\n")
