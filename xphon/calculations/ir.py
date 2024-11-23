@@ -29,7 +29,7 @@ def launch_ir_calculation():
 
 
     os.makedirs(PHONONS_DIR, exist_ok=True)
-    shutil.copyfile('INCAR', PHONONS_DIR)
+    shutil.copyfile('INCAR', f'{PHONONS_DIR}/INCAR')
 
     launch_jobs(subdir_paths=[PHONONS_DIR],
                 jobscript_path=jobscript_path,
