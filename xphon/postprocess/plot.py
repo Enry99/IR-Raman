@@ -6,6 +6,9 @@ from __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
 
+#TODO: Add peaks identification to the plot.
+
+
 COLORS = {
     'ir': 'orangered',
     'raman': 'green'

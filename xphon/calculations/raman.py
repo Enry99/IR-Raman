@@ -194,7 +194,7 @@ def write_raman_spectrum():
             a, gamma2, delta2, activity = get_raman_data_for_mode(ra)
 
             #write to output file
-            f.write(f"{mode.id:03d}  {mode.id_vasp:03d}   {mode.frequency:10.5f}  {a:10.7f}\
-                                {gamma2:10.7f}  {delta2:10.7f} {activity:10.7f}\n")
+            f.write(f"{mode.id:03d}  {mode.id_vasp:03d}  {mode.frequency:10.5f}  "\
+                    f"{a:10.7f}  {gamma2:10.7f}  {delta2:10.7f}  {activity:10.7f}\n")
 
     print("Raman spectrum written to raman_spectrum.dat")
