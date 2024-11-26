@@ -36,7 +36,13 @@ class CLICommand(CLICommandBase):
     @staticmethod
     def run(args : argparse.Namespace):
         from xphon.postprocess.plot import plot_spectrum
-        plot_spectrum(args.spectrum, args.broaden, args.fwhm, args.range)
+        plot_spectrum(spectrum=args.spectrum,
+                        broaden_type=args.broaden,
+                        fwhm=args.fwhm,
+                        laser_freq=args.laser_freq,
+                        temperature=args.temperature,
+                        freq_range=args.range,
+                        show_peaks=args.show_peaks)
 
 
     @staticmethod
