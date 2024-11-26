@@ -5,8 +5,7 @@ from __future__ import annotations
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-#TODO: Add peaks identification to the plot.
+from scipy.signal import find_peaks
 
 
 COLORS = {
@@ -22,14 +21,20 @@ COLUMNS = {
 def plot_spectrum(spectrum : str,
                   broaden_type : str | None = None,
                   fwhm : float = 0,
-                  freq_range : tuple[float, float] | None = None):
+                  laser_freq : float | None = None,
+                  temperature : float = 300,
+                  freq_range : tuple[float, float] | None = None,
+                  show_peaks : bool = False):
     """Plot the spectrum with the given parameters.
 
     Args:
         - spectrum (str): Which spectrum to plot.
         - broaden_type (str): Type of broadening to apply to the spectrum. ('gauss' or 'lorentz')
         - fwhm (float): Broadening FWHM for the spectrum.
+        - laser_freq (float): Frequency in cm^-1 of the laser used to excite the Raman spectrum.
+        - temperature (float): Temperature in K for the Raman spectrum.
         - freq_range (tuple): Frequency range (cm-1) of the spectrum to plot.
+        - show_peaks (bool): Whether to show the peaks in the spectrum.
     """
 
     # Read the data
@@ -41,6 +46,14 @@ def plot_spectrum(spectrum : str,
     x = data[:, 0]
     y = data[:, 1]
 
+
+    # Prefactor as calculated in CRYSTAL
+    if spectrum == 'raman' and laser_freq is not None:
+        # Bose occupancy factor
+        B = 1/( 1 - np.exp(-1.9865e23 * laser_freq / (1.38064852e-23 * temperature) ))
+        y = y * B/30*x * (x - laser_freq)**4 # Correct the Raman spectrum
+
+
     # Plot the data
     print(f'Plotting {spectrum}...')
     if broaden_type is None:
@@ -51,9 +64,17 @@ def plot_spectrum(spectrum : str,
 
     else:
         from xphon.postprocess.broaden import get_broadened_spectrum
+
         x, y = get_broadened_spectrum(x, y, fwhm, function=broaden_type)
 
         plt.plot(x, y, color=COLORS[spectrum])
+
+        if show_peaks: #plot the peaks points and also the frequency labels
+            peaks, _ = find_peaks(y, prominence=1)
+            plt.plot(x[peaks], y[peaks], color='red')
+            for i, peak in enumerate(peaks):
+                plt.text(x[peak], y[peak], f'{int(x[peak])}', fontsize=8, ha='center', va='bottom')
+
 
     if freq_range is not None:
         plt.xlim(freq_range)
