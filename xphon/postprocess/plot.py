@@ -43,6 +43,9 @@ def plot_spectrum(spectrum : str,
                       dtype=float,
                       skiprows=1,
                       usecols=COLUMNS[spectrum])
+
+    if freq_range is not None:
+        data = data[(data[:, 0] >= freq_range[0]) & (data[:, 0] <= freq_range[1])]
     x = data[:, 0]
     y = data[:, 1]
 
@@ -77,10 +80,6 @@ def plot_spectrum(spectrum : str,
             for i, peak in enumerate(peaks):
                 plt.text(x[peak], y[peak]+0.01, f'{int(x[peak])}',
                          fontsize=8, ha='center', va='bottom')
-
-
-    if freq_range is not None:
-        plt.xlim(freq_range)
 
     plt.xlabel('Frequency (cm-1)')
     plt.ylabel('Intensity (a.u.)')
