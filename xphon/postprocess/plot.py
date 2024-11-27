@@ -51,9 +51,8 @@ def plot_spectrum(spectrum : str,
     if spectrum == 'raman' and laser_freq is not None:
         print('Applying Laser frequency correction...')
         # Bose occupancy factor
-        B = 1/( 1 - np.exp(-1.9865e-23 * laser_freq / (1.38064852e-23 * temperature) ))
-        #print(f'Bose factor: {B}')
-        y = y * B/(30*x) * (x - laser_freq)**4 # Correct the Raman spectrum
+        one_plus_n = 1/( 1 - np.exp(-1.9865e-23 * x / (1.38064852e-23 * temperature) ))
+        y = y * one_plus_n/(30*x) * (x - laser_freq)**4 # Correct the Raman spectrum
 
 
     # Plot the data
