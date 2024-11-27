@@ -49,9 +49,11 @@ def plot_spectrum(spectrum : str,
 
     # Prefactor as calculated in CRYSTAL
     if spectrum == 'raman' and laser_freq is not None:
+        print('Applying Laser frequency correction...')
         # Bose occupancy factor
-        B = 1/( 1 - np.exp(-1.9865e23 * laser_freq / (1.38064852e-23 * temperature) ))
-        y = y * B/30*x * (x - laser_freq)**4 # Correct the Raman spectrum
+        B = 1/( 1 - np.exp(-1.9865e-23 * laser_freq / (1.38064852e-23 * temperature) ))
+        #print(f'Bose factor: {B}')
+        y = y * B/(30*x) * (x - laser_freq)**4 # Correct the Raman spectrum
 
 
     # Plot the data
@@ -70,10 +72,12 @@ def plot_spectrum(spectrum : str,
         plt.plot(x, y, color=COLORS[spectrum])
 
         if show_peaks: #plot the peaks points and also the frequency labels
-            peaks, _ = find_peaks(y, prominence=1)
-            plt.plot(x[peaks], y[peaks], color='red')
+            print('Finding peaks...')
+            peaks, _ = find_peaks(y, prominence=0.01, wlen=20)
+            plt.plot(x[peaks], y[peaks], 'ro', markersize=3)
             for i, peak in enumerate(peaks):
-                plt.text(x[peak], y[peak], f'{int(x[peak])}', fontsize=8, ha='center', va='bottom')
+                plt.text(x[peak], y[peak]+0.01, f'{int(x[peak])}',
+                         fontsize=8, ha='center', va='bottom')
 
 
     if freq_range is not None:
