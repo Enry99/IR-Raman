@@ -103,7 +103,7 @@ def scancel():
     if Path("submitted_jobs.txt").exists():
         with open("submitted_jobs.txt", "r",encoding=sys.getfilesystemencoding()) as f:
             submitted_jobs = f.readlines()
-            submitted_job_ids = [job.strip() for job in submitted_jobs]
+            submitted_job_ids = [int(job.strip()) for job in submitted_jobs]
     else:
         submitted_job_ids = []
 

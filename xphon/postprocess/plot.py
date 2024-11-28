@@ -75,7 +75,7 @@ def plot_spectrum(spectrum : str,
 
         if show_peaks: #plot the peaks points and also the frequency labels
             print('Finding peaks...')
-            peaks, _ = find_peaks(y, prominence=0.01, wlen=20)
+            peaks, _ = find_peaks(y, prominence=0.01, distance=20, wlen=20)
             plt.plot(x[peaks], y[peaks], 'ro', markersize=3)
             for i, peak in enumerate(peaks):
                 plt.text(x[peak], y[peak]+0.01, f'{int(x[peak])}',
