@@ -1,20 +1,10 @@
 #!/usr/bin/env python3
 #
-# vasp_raman.py v. 0.6.0
+# Author: Enrico Pedretti (University of Bologna), 2024
 #
-# Raman off-resonant activity calculator
-# using VASP as a back-end.
-#
-# Contributors: Alexandr Fonari (Georgia Tech)
-# Shannon Stauffer (UT Austin)
-#
+# Inspired by vasp_raman.py v. 0.6.0 by
+# Alexandr Fonari (Georgia Tech) and hannon Stauffer (UT Austin)
 # URL: http://raman-sc.github.io
-#
-# MIT license, 2013 - 2016
-#
-# Modified by Enrico Pedretti (University of Bologna), 2024
-# to add many functionalities: update to python3, launch jobs in parallel,
-# read settings from json file, added asymmetric anisotropy contribution.
 
 
 import os
@@ -23,8 +13,8 @@ from math import pi
 from ase.io import write
 from ase import Atoms
 
-from xphon.calculations.utils import Mode, get_modes_from_OUTCAR, \
-    read_input_parameters, get_epsilon_from_OUTCAR
+from xphon.calculations.utils import Mode, read_input_parameters, \
+    get_modes, get_epsilon
 from xphon.calculations.jobs import launch_jobs
 from xphon import RAMAN_DIR, PHONONS_DIR
 
@@ -45,8 +35,8 @@ def write_displaced_POSCARS(atoms : Atoms, step_size: int):
 
     natoms = len(atoms)
 
-    # read (non-imaginary) phonon modes from OUTCAR
-    modes_list = get_modes_from_OUTCAR(f'{PHONONS_DIR}/OUTCAR', natoms)
+    # read (non-imaginary) phonon modes
+    modes_list = get_modes(f'{PHONONS_DIR}/vasprun.xml')
 
 
     #loop over phonon modes and write displaced POSCARs
@@ -61,14 +51,14 @@ def write_displaced_POSCARS(atoms : Atoms, step_size: int):
             subdir = f'{RAMAN_DIR}/{mode.id:04d}.{displacement:+d}'
             os.makedirs(subdir, exist_ok=True)
 
-            outcar_path = f'{subdir}/OUTCAR'
+            vasprun_path = f'{subdir}/vasprun.xml'
 
-            if os.path.isfile(outcar_path):
+            if os.path.isfile(vasprun_path):
                 try:
-                    get_epsilon_from_OUTCAR(outcar_path)
+                    get_epsilon(vasprun_path)
                     continue
                 except RuntimeError as e:
-                    print(f"{outcar_path}: {e}, re-running.")
+                    print(f"{vasprun_path}: {e}, re-running.")
 
             print(f"Writing files for mode {mode.id}, displacement {displacement:+d}")
 
@@ -105,7 +95,7 @@ def launch_raman_calculations(write_only : bool = False):
 
 def get_raman_tensor_for_mode(mode : Mode, step_size : float, volume : float):
     '''
-    Calculate Raman tensor for a given mode, reading the displaced OUTCAR files
+    Calculate Raman tensor for a given mode, reading the displaced epsilons
 
     Args:
     - mode: Mode object
@@ -122,12 +112,12 @@ def get_raman_tensor_for_mode(mode : Mode, step_size : float, volume : float):
     for j, displacement in enumerate(DISPS):
 
         subdir = f'{RAMAN_DIR}/{mode.id:04d}.{displacement:+d}'
-        outcar_path = f'{subdir}/OUTCAR'
+        vasprun_path = f'{subdir}/vasprun.xml'
 
         try:
-            eps = get_epsilon_from_OUTCAR(outcar_path)
+            eps = get_epsilon(vasprun_path)
         except Exception as e:
-            print(f"{outcar_path}: {e}, skipping.")
+            print(f"{vasprun_path}: {e}, skipping.")
             continue
 
         #add contribution to Raman tensor
@@ -174,12 +164,12 @@ def get_raman_data_for_mode(ra):
 
 def write_raman_spectrum():
     '''
-    Write the Raman activity, reading the displaced OUTCAR files
+    Write the Raman activity, reading the displaced files
     '''
 
-    print("Reading Raman data from OUTCAR files...")
+    print("Reading Raman data from vasprun.xml files...")
     atoms, step_size, _, _ = read_input_parameters()
-    modes_list = get_modes_from_OUTCAR(f'{PHONONS_DIR}/OUTCAR', len(atoms))
+    modes_list = get_modes(f'{PHONONS_DIR}/vasprun.xml')
 
     print('Calculating Raman activity...')
     with open('raman_spectrum.dat', 'w') as f:

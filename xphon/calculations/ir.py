@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# plot IR (S.Nenon 2015 - VASP_tools https://github.com/sebnenon/VASP_tools)
-#
-# Modified by Enrico Pedretti (University of Bologna), 2024
+# Author: Enrico Pedretti (University of Bologna), 2024
+# Inspired by plot IR (S.Nenon 2015 - VASP_tools https://github.com/sebnenon/VASP_tools)
 
 
 import sys
@@ -11,7 +10,7 @@ import os
 import shutil
 
 from xphon.calculations.utils import Mode, read_input_parameters, \
-    get_modes_from_OUTCAR, get_Born_charges_from_OUTCAR
+    get_modes, get_born_charges
 from xphon.calculations.jobs import launch_jobs
 from xphon import PHONONS_DIR
 
@@ -72,19 +71,16 @@ def write_ir_spectrum():
     Writes the IR spectrum to file
     '''
 
-    atoms, _, _, _ = read_input_parameters()
-    natoms = len(atoms)
-
-    if not os.path.isfile(f'{PHONONS_DIR}/OUTCAR'):
-        sys.exit(f"OUTCAR file not found in {PHONONS_DIR}")
+    if not os.path.isfile(f'{PHONONS_DIR}/vasprun.xml'):
+        sys.exit(f"vasprun.xml file not found in {PHONONS_DIR}")
 
 
-    print(f"Reading eigenvectors from {PHONONS_DIR}/OUTCAR")
-    modes_list = get_modes_from_OUTCAR(f'{PHONONS_DIR}/OUTCAR', natoms)
+    print(f"Reading eigenvectors from {PHONONS_DIR}/vasprun.xml")
+    modes_list = get_modes(PHONONS_DIR)
 
 
-    print(f"Reading Born charges from {PHONONS_DIR}/OUTCAR")
-    born_charges = get_Born_charges_from_OUTCAR(f'{PHONONS_DIR}/OUTCAR', natoms)
+    print(f"Reading Born charges from {PHONONS_DIR}/vasprun.xml")
+    born_charges = get_born_charges(f'{PHONONS_DIR}/vasprun.xml')
 
 
     print("Computing IR intensities...")

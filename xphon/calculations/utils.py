@@ -2,12 +2,13 @@
 Common utility functions for IR and Raman calculations
 '''
 
-import re
 import json
-from math import sqrt
+from pathlib import Path
 from dataclasses import dataclass
 
+import numpy as np
 from ase.io import read
+from ase.calculators.vasp import Vasp
 
 
 @dataclass
@@ -29,12 +30,12 @@ class Mode:
     norm: float
 
 
-def get_modes_from_OUTCAR(outcar_filename : str, natoms : int):
+def get_modes(directory: str):
     '''
-    Read phonon modes from OUTCAR file, excluding imaginary modes.
+    Read phonon modes from vasprun.xml file, excluding imaginary modes.
 
     Args:
-    - outcar_filename: path to OUTCAR file
+    - directory: path to the directory containing the calculation results
     - natoms: number of atoms in the structure
 
     Returns:
@@ -43,115 +44,54 @@ def get_modes_from_OUTCAR(outcar_filename : str, natoms : int):
 
     modes_list : list[Mode] = []
 
-    with open(outcar_filename, 'r') as f:
+    if not Path(f'{directory}/ase-sort.dat').is_file():
+        #write fake ase-sort.dat to make ase happy
+        atoms = read(f'{directory}/POSCAR')
+        with open(f'{directory}/ase-sort.dat', 'w') as f:
+            for n in range(len(atoms)):
+                f.write('%5i %5i \n' % (n, n))
 
-        while True:
-            line = f.readline()
-            if not line:
-                break
+    vasp = Vasp(directory=directory)
+    vasp.read()
 
-            if "Eigenvectors after division by SQRT(mass)" in line:
-                f.readline() # empty line
-                f.readline() # Eigenvectors and eigenvalues of the dynamical matrix
-                f.readline() # ----------------------------------------------------
-                f.readline() # empty line
+    vibr = vasp.get_vibrations()
 
-                for i in range(natoms*3):
-                    f.readline() # empty line
-
-                    mode_header_line = f.readline()
-                    # 60 f  =    5.519867 THz    34.682350 2PiTHz  184.122959 cm-1    22.828327 meV
-                    match_regex = re.search(r'^\s*(\d+).+?([\.\d]+) cm-1', mode_header_line)
-                    if 'f/i' in mode_header_line:
-                        imaginary = True
-                    else:
-                        imaginary = False
+    frequencies = vibr.get_frequencies()
+    frequencies_vasp = np.array([len(frequencies)-i for i in range(len(frequencies))])
+    eigenvectors = vibr.get_modes()
+    norms = np.array([np.linalg.norm(eig) for eig in eigenvectors])
 
 
-                    f.readline()# X         Y         Z           dx          dy          dz
-                    eigvec = []
-                    for _ in range(natoms):
-                        tmp = f.readline().split()
-                        eigvec.append([ float(tmp[x]) for x in range(3,6) ]) #range(3,6) -> dx dy dz
+    real_frequencies_idxs = [i for i in range(len(frequencies)) if frequencies[i].imag == 0]
+
+    for i in real_frequencies_idxs:
+        modes_list.append(Mode(i+1,
+                               frequencies_vasp[i],
+                               frequencies[i].real,
+                               eigenvectors[i],
+                               norms[i]))
+
+    return modes_list
 
 
-
-                    if not imaginary:
-                        modes_list.append(
-                            Mode(id=natoms*3-i, #reverse vasp order, starting from 1
-                                 id_vasp=int(match_regex.group(1)),
-                                 frequency=float(match_regex.group(2)),
-                                 eigvec=eigvec,
-                                 norm=sqrt(sum(abs(x)**2 for sublist in eigvec for x in sublist)))
-                                )
-
-
-                #reverse order of modes, since vasp writes them in reverse order (higer freqs first)
-                modes_list.reverse()
-
-                return modes_list
-
-        #if we are here, something went wrong
-        raise RuntimeError("Couldn't find 'Eigenvectors after division by SQRT(mass)' in OUTCAR.\
-                            Use 'NWRITE=3' in INCAR.")
-
-
-def get_epsilon_from_OUTCAR(outcar_filename):
+def get_epsilon(vasprun_path : str):
     '''
-    Read dielectric tensor from OUTCAR file.
+    Read dielectric tensor from vasprun.xml file
     '''
-    epsilon = []
 
-    with open(outcar_filename, 'r') as f:
-        f.seek(0) # just in case
-        while True:
-            line = f.readline()
-            if not line:
-                break
+    atoms = read(vasprun_path)
 
-            if "MACROSCOPIC STATIC DIELECTRIC TENSOR" in line:
-                f.readline()
-                epsilon.append([float(x) for x in f.readline().split()])
-                epsilon.append([float(x) for x in f.readline().split()])
-                epsilon.append([float(x) for x in f.readline().split()])
-                return epsilon
-
-        raise RuntimeError("Couldn't find dielectric tensor in OUTCAR")
+    return atoms.calc.results['dielectric_tensor']
 
 
-def get_Born_charges_from_OUTCAR(outcar_filename, natoms):
-    """
-    Generates a list of arrays containing Born Charges from OUTCAR
-    """
+def get_born_charges(vasprun_path : str):
+    '''
+    Read Born charges from vasprun.xml file
+    '''
 
-    born_charges = []  #size: natoms x 3(alpha) x 3(beta)
+    atoms = read(vasprun_path)
 
-    with open(outcar_filename, 'r') as f:
-
-        while True:
-            line = f.readline()
-            if not line:
-                break
-
-            if "BORN EFFECTIVE CHARGES (including local field effects)" in line:
-                f.readline() #-----------------------------------------
-
-                for i in range(natoms):
-
-                    line = f.readline() #read ion line, e.g. "ion  1"
-                    if 'ion' not in line or int(line.split()[1]) != i+1:
-                        raise RuntimeError("Error reading Born effective charges in OUTCAR")
-
-                    ion_charges = []
-                    for _ in range(3):
-                        line = f.readline() #  1     1.90698    -0.02671     0.02386
-                        ion_charges.append([float(x.strip()) for x in line.split()[1:]])
-
-                    born_charges.append(ion_charges)
-
-                return born_charges
-
-        raise RuntimeError("Couldn't find Born effective charges in OUTCAR")
+    return atoms.calc.results['born_effective_charges']
 
 
 def read_input_parameters():
@@ -174,7 +114,6 @@ def read_input_parameters():
         submit_command = settings.get('submit_command', 'sbatch')
 
 
-    # read POSCAR and OUTCAR with phonon modes ################################
-    atoms = read('POSCAR', format='vasp')
+    atoms = read('POSCAR')
 
     return atoms, step_size, jobscript_path, submit_command

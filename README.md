@@ -1,7 +1,7 @@
 # IR-Raman
 Xphon is a small Python package for the calculation of phonon modes, infrared and Raman spectra of molecules using DFPT in VASP.
 
-It combines and extends the scripts of [VASP_tools](https://github.com/sebnenon/VASP_tools) (IR) and [raman-sc/VASP](https://github.com/raman-sc/VASP) (Raman). \
+Inspired by the scripts [VASP_tools](https://github.com/sebnenon/VASP_tools) (IR) and [raman-sc/VASP](https://github.com/raman-sc/VASP) (Raman). \
 The [ASE](https://wiki.fysik.dtu.dk/ase/) library is used for reading/writing POSCAR files.
 
 Installation
