@@ -10,7 +10,7 @@ import warnings
 from ase.calculators.vasp import Vasp
 from ase import units
 from ase.vibrations import VibrationsData
-from ase.io import read, Trajectory
+from ase.io import read, write
 
 from xphon import PHONONS_DIR
 
@@ -27,9 +27,9 @@ def write_mode(vibrations : VibrationsData, directory : str, n=None, kT=units.kB
     else:
         n %= len(vibrations.get_energies())
 
-    with Trajectory(f'{directory}/{n+1}.traj', 'w') as traj:
-        for image in (vibrations.iter_animated_mode(n,temperature=kT, frames=nimages)):
-            traj.write(image)
+    traj = [frame for frame in vibrations.iter_animated_mode(n,temperature=kT, frames=nimages)]
+
+    write(f'{directory}/{n+1}.xyz', traj)
 
 
 def write_vibrations():

@@ -24,13 +24,13 @@ class CLICommand(CLICommandBase):
                             help='Type of broadening to apply to the spectrum.')
         parser.add_argument('-fwhm', type=float, default=10.0,
                             help='Broadening FWHM for the spectrum.')
-        parser.add_argument('-laser_freq', type=float,
+        parser.add_argument('-laser-freq', type=float,
                             help='Frequency in cm^-1 of the laser used to excite the Raman spectrum.')
         parser.add_argument('-temperature', type=float, default=300,
                             help='Temperature in K for the Raman spectrum.')
         parser.add_argument('-range', type=float, nargs=2,
                             help='Frequency range (cm-1) of the spectrum to plot.')
-        parser.add_argument('-show_peaks', action='store_true', default=True,
+        parser.add_argument('-no-peaks', action='store_true', default=False,
                             help='Show the peaks in the spectrum.')
 
     @staticmethod
@@ -42,7 +42,7 @@ class CLICommand(CLICommandBase):
                         laser_freq=args.laser_freq,
                         temperature=args.temperature,
                         freq_range=args.range,
-                        show_peaks=args.show_peaks)
+                        show_peaks= not args.no_peaks)
 
 
     @staticmethod

@@ -81,6 +81,13 @@ def plot_spectrum(spectrum : str,
                 plt.text(x[peak], y[peak]+0.01, f'{int(x[peak])}',
                          fontsize=8, ha='center', va='bottom')
 
+    #write x and y to file
+    print(f'Writing {spectrum}_spectrum_plotted.dat...')
+    with open(f'{spectrum}_spectrum_plotted.dat', 'w') as f:
+        f.write(f'Frequency (cm-1)    Intensity (a.u.)\n')
+        for i in range(len(x)):
+            f.write(f'{x[i]:10.5f}    {y[i]:10.5f}\n')
+
     plt.xlabel('Frequency (cm-1)')
     plt.ylabel('Intensity (a.u.)')
     plt.title(f'{spectrum.capitalize()} spectrum')

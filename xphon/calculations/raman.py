@@ -36,7 +36,7 @@ def write_displaced_POSCARS(atoms : Atoms, step_size: int):
     natoms = len(atoms)
 
     # read (non-imaginary) phonon modes
-    modes_list = get_modes(f'{PHONONS_DIR}/vasprun.xml')
+    modes_list = get_modes(PHONONS_DIR)
 
 
     #loop over phonon modes and write displaced POSCARs
@@ -169,7 +169,7 @@ def write_raman_spectrum():
 
     print("Reading Raman data from vasprun.xml files...")
     atoms, step_size, _, _ = read_input_parameters()
-    modes_list = get_modes(f'{PHONONS_DIR}/vasprun.xml')
+    modes_list = get_modes(PHONONS_DIR)
 
     print('Calculating Raman activity...')
     with open('raman_spectrum.dat', 'w') as f:

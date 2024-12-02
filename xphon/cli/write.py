@@ -8,7 +8,7 @@ from xphon.cli.command import CLICommandBase
 
 
 class CLICommand(CLICommandBase):
-    """Get results from vasprun.xml(s) and write spectrum to file.
+    """Write IR/Raman spectrum or trajectories of vibrational modes to file.
 
     Example usage:
     xphon write ir
@@ -20,7 +20,7 @@ class CLICommand(CLICommandBase):
     def add_arguments(parser : argparse.ArgumentParser):
         parser.add_argument('what',
                             choices=['ir', 'raman', 'trajs'],
-                            help='Which spectrum to write to file.')
+                            help='What to write to file: ir/raman spectrum or trajectories of vibrational modes')
 
     @staticmethod
     def run(args : argparse.Namespace):
