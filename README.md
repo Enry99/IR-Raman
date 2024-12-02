@@ -18,7 +18,7 @@ to add the executable in the `PATH` variable. With this operation, you can launc
 
 Finally, if you do not have it already, you need to install [ASE](https://wiki.fysik.dtu.dk/ase/) with:
 
-`pip install ase`
+`pip install ase==3.23.0`
 
 
 Usage
