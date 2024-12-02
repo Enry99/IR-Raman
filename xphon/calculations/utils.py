@@ -2,6 +2,7 @@
 Common utility functions for IR and Raman calculations
 '''
 
+import warnings
 import json
 from pathlib import Path
 from dataclasses import dataclass
@@ -52,7 +53,9 @@ def get_modes(directory: str):
                 f.write('%5i %5i \n' % (n, n))
 
     vasp = Vasp(directory=directory)
-    vasp.read()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        vasp.read()
 
     vibr = vasp.get_vibrations()
 
