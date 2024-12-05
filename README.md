@@ -26,6 +26,14 @@ Finally, if you do not have it already, you need to install [ASE](https://wiki.f
 
 `pip install ase==3.23.0`
 
+The help of the program can be displayed with
+
+`$ xphon -h`
+
+The help for the sub-commands can be visualized by placing `-h` after the command, e.g.:
+
+`$ xphon plot -h`
+
 Usage
 ----
 
