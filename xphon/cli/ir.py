@@ -12,7 +12,6 @@ class CLICommand(CLICommandBase):
 
     Example usage:
     xphon ir
-    xphon ir -write-only
     """
 
     @staticmethod
